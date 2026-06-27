@@ -110,6 +110,7 @@ func serverStart() error {
 		}
 		for running {
 			time.Sleep(time.Millisecond * 110)
+			requestPosition()
 			clipLengthBinding.Set(fmt.Sprintf("Clip Length: %.3fs", clipLength))
 			timeLeftBinding.Set(timeLeft)
 			// Mirror GUI updates to web — ensures web gets a heartbeat even

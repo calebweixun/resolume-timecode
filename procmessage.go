@@ -72,6 +72,15 @@ func lightReset() {
 	}
 }
 
+// requestPosition actively polls Resolume so the clock also works when its OSC
+// output preset is not configured to continuously publish transport position.
+func requestPosition() {
+	position := osc.NewMessage(clipPath+"/transport/position", "?")
+	if _, err := oscServer.WriteTo(position, OSCAddr+":"+OSCPort); err != nil {
+		fmt.Println(err)
+	}
+}
+
 func procPos(data *osc.Message) {
 	pos := data.Arguments[0].(float32)
 
@@ -87,6 +96,10 @@ func procPos(data *osc.Message) {
 	currentPosInterval := pos - posPrev
 
 	if currentPosInterval < 0 && posPrev > 0 {
+		// A loop, restart, or seek backwards must establish a new baseline.
+		// Leaving posPrev unchanged here causes every later position to be
+		// rejected until the user manually resets the server.
+		posPrev = pos
 		return
 	}
 

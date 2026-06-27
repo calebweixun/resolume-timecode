@@ -77,6 +77,9 @@ tag after publishing; create the next patch version instead.
   Windows UPX compression remains enabled.
 - The two macOS builds are merged before `.app` packaging to prevent parallel
   hooks from overwriting one another.
+- While the server is running, the app actively polls Resolume transport
+  position about every 110 ms. Continuous OSC Output is therefore optional;
+  Resolume must still accept OSC queries on its configured input port.
 
 ## Change Discipline
 
