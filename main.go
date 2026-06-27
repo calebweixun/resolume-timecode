@@ -29,6 +29,11 @@ var (
 	clientMessage = ""
 	clipInvert    = a.Preferences().BoolWithFallback("clipInvert", false)
 
+	showHours    = a.Preferences().BoolWithFallback("showHours", false)
+	showMs       = a.Preferences().BoolWithFallback("showMs", false)
+	showSign     = a.Preferences().BoolWithFallback("showSign", true)
+	clipNameSize = a.Preferences().FloatWithFallback("clipNameSize", 2.2)
+
 	//go:embed index.html
 	//go:embed main.js
 	//go:embed images/favicon.png
@@ -107,6 +112,12 @@ func serverStart() error {
 			time.Sleep(time.Millisecond * 110)
 			clipLengthBinding.Set(fmt.Sprintf("Clip Length: %.3fs", clipLength))
 			timeLeftBinding.Set(timeLeft)
+			// Mirror GUI updates to web — ensures web gets a heartbeat even
+			// when procPos OSC messages are filtered or the channel drops them.
+			if timeLeft != "" {
+				broadcast.Publish(osc.NewMessage("/time", timeLeft, fmt.Sprintf("%.3fs", clipLength)))
+				broadcast.Send()
+			}
 		}
 		timeLeftBinding.Set("00:00:00.000")
 		clipLengthBinding.Set("Clip Length: 0.000s")
@@ -208,7 +219,12 @@ func websocketStart(w http.ResponseWriter, r *http.Request) {
 	//	return
 	//}
 
-	b, _ := osc.NewBundle(osc.NewMessage("/message", clientMessage), osc.NewMessage("/name", clipName), osc.NewMessage("/tminus", !clipInvert)).MarshalBinary()
+	b, _ := osc.NewBundle(
+		osc.NewMessage("/message", clientMessage),
+		osc.NewMessage("/name", clipName),
+		osc.NewMessage("/tminus", !clipInvert),
+		osc.NewMessage("/clock", showHours, showMs, showSign, float32(clipNameSize)),
+	).MarshalBinary()
 	if c.Write(ctx, websocket.MessageBinary, b) != nil {
 		return
 	}

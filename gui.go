@@ -145,6 +145,24 @@ func gui() {
 	invertField := widget.NewCheck("", nil)
 	invertField.SetChecked(!clipInvert)
 
+	showHoursField := widget.NewCheck("", nil)
+	showHoursField.SetChecked(showHours)
+
+	showMsField := widget.NewCheck("", nil)
+	showMsField.SetChecked(showMs)
+
+	showSignField := widget.NewCheck("", nil)
+	showSignField.SetChecked(showSign)
+
+	clipNameSizeSlider := widget.NewSlider(0.5, 6.0)
+	clipNameSizeSlider.Step = 0.1
+	clipNameSizeSlider.SetValue(clipNameSize)
+	clipNameSizeLabel := widget.NewLabel(fmt.Sprintf("%.1f vw", clipNameSize))
+	clipNameSizeSlider.OnChanged = func(v float64) {
+		clipNameSizeLabel.SetText(fmt.Sprintf("%.1f vw", v))
+	}
+	clipNameSizeRow := container.NewBorder(nil, nil, nil, clipNameSizeLabel, clipNameSizeSlider)
+
 	form := &widget.Form{
 		Items: []*widget.FormItem{
 			{Widget: NewValidateTabs(container.NewTabItemWithIcon("Client Settings", theme.ConfirmIcon(), &widget.Form{
@@ -160,6 +178,14 @@ func gui() {
 						{Text: "OSC Output Port", Widget: oscOutput, HintText: "OSC Output port (usually 7001) Note: If you have multiple services using Resolume OSC make use the correct broadcast address."},
 						{Text: "OSC Host Address", Widget: oscAddr, HintText: "IP address of device that's running Resolume (make sure to open the OSC input port in your firewall)"},
 						{Text: "HTTP Server Port", Widget: httpPortField, HintText: "The port to run the browser interface on"},
+					},
+				}),
+				container.NewTabItemWithIcon("Clock Settings", theme.ConfirmIcon(), &widget.Form{
+					Items: []*widget.FormItem{
+						{Text: "Show Hours (HH)", Widget: showHoursField, HintText: "Show or hide the hours digits on the web display"},
+						{Text: "Show Milliseconds", Widget: showMsField, HintText: "Show or hide the milliseconds digits on the web display"},
+						{Text: "Show +/−", Widget: showSignField, HintText: "Show or hide the T+/T− sign on the web display"},
+						{Text: "Clip Name Size", Widget: clipNameSizeRow, HintText: "Font size of the clip name on the web display (in vw units)"},
 					},
 				}),
 			),
@@ -188,6 +214,16 @@ func gui() {
 		clipInvert = !invertField.Checked
 		a.Preferences().SetBool("clipInvert", clipInvert)
 		broadcast.Publish(osc.NewMessage("/tminus", !clipInvert))
+
+		showHours = showHoursField.Checked
+		a.Preferences().SetBool("showHours", showHours)
+		showMs = showMsField.Checked
+		a.Preferences().SetBool("showMs", showMs)
+		showSign = showSignField.Checked
+		a.Preferences().SetBool("showSign", showSign)
+		clipNameSize = clipNameSizeSlider.Value
+		a.Preferences().SetFloat("clipNameSize", clipNameSize)
+		broadcast.Publish(osc.NewMessage("/clock", showHours, showMs, showSign, float32(clipNameSize)))
 
 		infoLabel.ParseMarkdown("Starting Server")
 

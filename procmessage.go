@@ -60,6 +60,8 @@ func reset() {
 	lightReset()
 
 	posPrev = 0
+	broadcast.Publish(osc.NewMessage("/reset"))
+	broadcast.Send()
 }
 
 func lightReset() {

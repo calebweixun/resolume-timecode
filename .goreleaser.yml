@@ -1,4 +1,5 @@
 project_name: resolume-timecode
+
 before:
   hooks:
     - go get github.com/tc-hib/go-winres@latest
@@ -7,12 +8,11 @@ before:
     - bash -c "rsvg-convert -h 32 images/logo.svg > images/favicon.png"
     - bash -c "rsvg-convert -h 256 images/logo.svg > images/logo.png"
     - go-winres make --product-version=git-tag --file-version=git-tag
+
 builds:
-  - id: darwin
-    goos:
-      - darwin
-    goarch:
-      - amd64
+  - id: darwin-amd64
+    goos: [darwin]
+    goarch: [amd64]
     env:
       - CGO_ENABLED=1
     flags:
@@ -28,11 +28,28 @@ builds:
         - upx {{ .Path }}
         - sh macos.sh resolume-timecode images/logo.svg "me.chabad360.resolume-timecode" {{ .Major }} {{ .Minor }}
         - cp {{ .Path }} resolume-timecode.app/Contents/MacOS/
+
+  - id: darwin-arm64
+    goos: [darwin]
+    goarch: [arm64]
+    env:
+      - CGO_ENABLED=1
+    flags:
+      - -mod=readonly
+      - -trimpath
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.Date={{.CommitDate}}
+    mod_timestamp: '{{ .CommitTimestamp }}'
+    hooks:
+      post:
+        - sh macos.sh resolume-timecode images/logo.svg "me.chabad360.resolume-timecode" {{ .Major }} {{ .Minor }}
+        - cp {{ .Path }} resolume-timecode.app/Contents/MacOS/
+
   - id: windows
-    goos:
-      - windows
-    goarch:
-      - amd64
+    goos: [windows]
+    goarch: [amd64]
     env:
       - CGO_ENABLED=1
       - CC=x86_64-w64-mingw32-gcc
@@ -48,8 +65,10 @@ builds:
     mod_timestamp: '{{ .CommitTimestamp }}'
     hooks:
       post: upx {{ .Path }}
+
 checksum:
   name_template: 'checksums.txt'
+
 changelog:
   sort: asc
   filters:
@@ -58,26 +77,31 @@ changelog:
       - '^ci:'
       - '^docs?:'
       - '^tests?:'
+
 release:
   github:
     owner: chabad360
     name: resolume-timecode
   draft: true
   prerelease: auto
+
 archives:
   - id: darwin
-    builds:
-      - darwin
+    builds: [darwin-amd64, darwin-arm64]
     format: zip
     wrap_in_directory: true
-    replacements:
-      darwin: macOS
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- .Version }}_
+      {{- if eq .Os "darwin" }}macOS{{ else }}{{ .Os }}{{ end }}_
+      {{- .Arch }}
     files:
       - LICENSE
       - README.MD
       - resolume-timecode.app
+
   - id: windows
-    builds:
-      - windows
+    builds: [windows]
     format: zip
     wrap_in_directory: true
+    name_template: '{{ .ProjectName }}_{{ .Version }}_Windows_{{ .Arch }}'

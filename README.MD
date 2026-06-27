@@ -29,8 +29,26 @@
 | Selected Layer | `/composition/selectedlayer`    |
 | Specific Layer | `/composition/layers/1`         |
 
-> Note: using a layer will cause the layer's name to be shown on the client instead of the clip name
-> (I'm not sure if there is a way to fix that).
+> Note: using a layer will cause the layer's name to be shown on the client instead of the clip name.
+
+## Clock Settings
+
+The web display can be customised from the **Clock Settings** tab in the server GUI — no need to touch the browser.
+
+| Setting | Default | Description |
+|:--------|:--------|:------------|
+| Show Hours (HH) | Off | Show or hide the hours digits |
+| Show Milliseconds | Off | Show or hide the milliseconds digits |
+| Show +/− | On | Show or hide the T+/T− sign |
+| Clip Name Size | 2.2 vw | Font size of the clip name label |
+
+Changes take effect immediately on all connected clients when you click **Update Settings**.
+
+## OBS / Broadcast use
+
+The web client is designed to fit a **1280×720** browser source out of the box. The timecode fills the full viewport with no scrollbars. Set your OBS browser source to 1280×720 and point it at `http://<server-ip>:8080`.
+
+The display turns **red** when less than 10 seconds remain.
 
 ## Motivation
 
@@ -39,15 +57,11 @@ the remaining time was to ask the guy in front of the laptop. So I decided to fi
 
 ## How it works
 
-Resolume outputs the position of the clip head through OSC, by calculating how much time it took between the one message
-and the previous one, it's possible to calculate how long the clip is, and therefore how much time is left.
-Due to certain inconsistencies in the way this information is outputted, it's not as simple as it sounds.
+Resolume outputs the position of the clip head through OSC. The server receives these messages, calculates the remaining
+time, and broadcasts it to all connected web clients via WebSocket every ~110ms. The browser then interpolates between
+updates using `requestAnimationFrame` for a smooth, continuously-running display.
 
-For the exact algorithm, check [procmessage.go](https://github.com/chabad360/resolume-timecode/blob/master/procmessage.go) 
-(specifically, [`procPos()`](https://github.com/chabad360/resolume-timecode/blob/master/procmessage.go#L97)).
-
-Anyway, because we're running in a browser, we can't actually interact with OSC (as it works over UDP),
-so this application also acts a proxy, running the algorithm on the messages and sending the timecode to the client.
+For the exact algorithm, check [procmessage.go](https://github.com/chabad360/resolume-timecode/blob/master/procmessage.go).
 
 ## Known Issues
 
@@ -55,6 +69,26 @@ so this application also acts a proxy, running the algorithm on the messages and
 
 ## Building
 
-Because this is based on [fyne](https://fyne.io) it requires the use of _cgo_, so make sure you have a C compiler installed on your system.
+Because this is based on [fyne](https://fyne.io) it requires the use of _cgo_, so make sure you have a C compiler installed.
 
-Just clone the repo and run `go build github.com/chabad360/resolume-timecode`.
+```bash
+git clone https://github.com/chabad360/resolume-timecode
+cd resolume-timecode
+go build .
+```
+
+A `dev.sh` helper script is included for local development:
+
+```bash
+./dev.sh          # build + run
+./dev.sh send-osc # simulate Resolume OSC output (requires python3)
+./dev.sh open     # open browser to web client
+./dev.sh clean    # remove build artefacts
+```
+
+Releases for macOS (Intel + Apple Silicon) and Windows are built automatically via GitHub Actions when a version tag is pushed:
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```

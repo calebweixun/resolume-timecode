@@ -13,7 +13,7 @@ type Distributor struct {
 }
 
 func (d *Distributor) Listen(key string) <-chan []byte {
-	ch := make(chan []byte)
+	ch := make(chan []byte, 8)
 	d.m.Lock()
 
 	if och, ok := d.l[key]; ok {

@@ -3,125 +3,171 @@
 <head>
     <meta charset="utf-8">
     <title>Timecode Monitor</title>
-
     <link rel="icon" type="image/png" href="images/favicon.png">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+        body {
+            background: #000;
+            color: #FDFBF7;
+            font-family: 'Roboto Mono', 'Courier New', monospace;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* clip name */
+        #clipname-wrap {
+            font-size: 2.2vw;
+            letter-spacing: 0.05em;
+            color: #aaa;
+            margin-bottom: 1.5vh;
+            text-align: center;
+        }
+        #clipname { color: #fff; font-weight: bold; }
+
+        /* card */
+        #tableborder {
+            border: 0.5vw solid #4b5457;
+            border-radius: 2vw;
+            background: #111417;
+            padding: 2vh 2vw;
+            display: inline-block;
+        }
+
+        /* digit table */
+        #table {
+            color: #45ff45;
+            border-collapse: collapse;
+            line-height: 1;
+        }
+
+        #digits-row td {
+            font-size: 18vw;
+            font-weight: 100;
+            letter-spacing: -0.02em;
+            padding: 0 0.01em;
+            vertical-align: middle;
+        }
+
+        #digits-row td.sep {
+            font-size: 12vw;
+            padding: 0;
+            vertical-align: middle;
+            opacity: 0.6;
+        }
+
+        #digits-row td.ms-digit {
+            font-size: 9vw;
+            vertical-align: bottom;
+            padding-bottom: 0.5vw;
+        }
+
+        #labels-row td {
+            font-size: 1.5vw;
+            font-weight: 600;
+            text-align: center;
+            color: #888;
+            padding-top: 0.5vh;
+        }
+
+        /* HH and ms hidden by default — toggled via .clock-hidden class from JS */
+        .clock-hidden { display: none !important; }
+
+        /* alert message */
+        #msg {
+            font-size: 2.5vw;
+            margin-top: 2vh;
+            min-height: 1.2em;
+            display: none;
+        }
+
+        /* settings panel */
+        #settings-toggle {
+            position: fixed;
+            bottom: 1vh;
+            right: 1.5vw;
+            font-size: 1vw;
+            color: #333;
+            cursor: pointer;
+            user-select: none;
+            z-index: 10;
+        }
+        #settings-panel {
+            display: none;
+            position: fixed;
+            bottom: 4vh;
+            right: 1.5vw;
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 1em;
+            font-size: 1vw;
+            color: #aaa;
+            z-index: 10;
+            min-width: 16em;
+            text-align: left;
+        }
+        #settings-panel a { color: #2494ff; }
+        .settings-row { margin-bottom: 0.6em; }
+    </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@100;400;600&display=swap" rel="stylesheet">
-
-    <style>
-        body {
-            background-color: #000000;
-            color: #FDFBF7;
-            font-family: 'Roboto Mono', monospace;
-            font-size: 1em;
-            text-align:center;
-        }
-
-        a {
-            color: #2494ff;
-        }
-
-        label {
-            margin-right: 1em;
-        }
-
-        .number {
-            font-weight: 100;
-        }
-    </style>
 </head>
-
 <body>
-<p id="msg" style="font-size: 2em;">Timecode Monitor</p>
-<div id="tableborder" style="border-width: 6px; border-color: #4b5457; border-radius: 40px; border-style: solid; background-color: #111417; margin: 3em;">
-    <p style="font-size: 1.5em; margin-bottom:-.5em;" >Clip Name: <strong id="clipname">None</strong></p>
-    <table style="margin-left: auto; margin-right:auto; padding-bottom: 10px; color: #45ff45;" id="table">
-        <tr style="font-size:10vw;">
-            <td class="minus number">-</td>
-            <td class="hours number" id="timecode-hours">00</td>
-            <td class="hours">:</td>
-            <td class="number" id="timecode-minutes">00</td>
-            <td>:</td>
-            <td class="number" id="timecode-seconds">00</td>
-            <td class="ms">.</td>
-            <td class="ms number" id="timecode-ms">000</td>
+
+<div id="clipname-wrap">Clip: <span id="clipname">None</span></div>
+
+<div id="tableborder">
+    <table id="table">
+        <tbody>
+        <tr id="digits-row">
+            <td class="minus">-</td>
+            <td class="hours clock-hidden" id="timecode-hours">00</td>
+            <td class="hours sep clock-hidden">:</td>
+            <td id="timecode-minutes">00</td>
+            <td class="sep">:</td>
+            <td id="timecode-seconds">00</td>
+            <td class="ms sep clock-hidden">.</td>
+            <td class="ms ms-digit clock-hidden" id="timecode-ms">000</td>
         </tr>
-        <tr style="font-weight: 600;">
+        <tr id="labels-row">
             <td class="minus"></td>
-            <td class="hours">Hours</td>
-            <td class="hours" ></td>
-            <td>Minutes</td>
+            <td class="hours clock-hidden">HH</td>
+            <td class="hours clock-hidden"></td>
+            <td>MM</td>
             <td></td>
-            <td>Seconds</td>
-            <td class="ms" ></td>
-            <td class="ms">Milliseconds</td>
+            <td>SS</td>
+            <td class="ms clock-hidden"></td>
+            <td class="ms clock-hidden">ms</td>
         </tr>
+        </tbody>
     </table>
 </div>
 
-<details style="text-align: left; margin-left: 3em;">
-    <summary style="font-size:1.25em;">Settings</summary>
-    <div>Clip Length: <strong id="ms">0.000s</strong></div>
-    <div>Server Status: <strong id="status">Server Stopped</strong></div>
-    <br/>
-    <div>
-    <input type="checkbox" id="checkbox-minus" checked onclick="showHide()">
-    <label for="checkbox-minus">Show minus/plus</label>
+<div id="msg"></div>
 
-    <input type="checkbox" id="checkbox-hours" checked onclick="showHide()">
-    <label for="checkbox-hours">Show Hours</label>
+<div id="settings-toggle" onclick="toggleSettings()">⚙ settings</div>
+<div id="settings-panel">
+    <div class="settings-row">Status: <strong id="status">Connecting…</strong></div>
+    <div class="settings-row">Clip length: <strong id="ms">0.000s</strong></div>
+    <div class="settings-row" style="color:#555;font-size:0.85em;">Display settings are controlled<br>from the server GUI → Clock Settings</div>
+    <div class="settings-row"><a href="https://github.com/chabad360/resolume-timecode" target="_blank">chabad360/resolume-timecode</a></div>
+</div>
 
-    <input type="checkbox" id="checkbox-ms" checked onclick="showHide()">
-    <label for="checkbox-ms">Show Milliseconds</label>
-    </div>
-    <br />
-    <div>
-    <input type="number" id="padding" value="0" min="0" step="1" onchange="updatePadding()" style="width:3em;border-radius:5px;margin-left:2px;">
-    <label style="margin-left:-0.5em;" for="padding">em Padding</label>
-    </div>
-    <p>Checkout this tool at <a href="https://github.com/chabad360/resolume-timecode">chabad360/resolume-timecode</a></p>
-</details>
+<script>
+    function toggleSettings() {
+        const p = document.getElementById("settings-panel");
+        p.style.display = p.style.display === "block" ? "none" : "block";
+    }
+</script>
 
 <script src="osc.min.js" type="module"></script>
 <script src="main.js" type="module"></script>
-<script type="text/javascript">
-    const checkboxminus = document.getElementById("checkbox-minus");
-    const checkboxhours = document.getElementById("checkbox-hours");
-    const checkboxms = document.getElementById("checkbox-ms");
-
-    let minus = document.getElementsByClassName("minus");
-    let hours = document.getElementsByClassName("hours");
-    let ms = document.getElementsByClassName("ms");
-
-    function hide(elem) {
-        for(i = 0; i < elem.length; i++) {
-            elem[i].style.visibility = 'hidden';
-            elem[i].style.display = 'none';
-        }
-    }
-
-    function show(elem) {
-        for(i = 0; i < elem.length; i++) {
-            elem[i].style.visibility = 'visible';
-            elem[i].style.display = 'revert';
-        }
-    }
-
-    function showHide() {
-        checkboxminus.checked === false ? hide(minus) : show(minus);
-        checkboxhours.checked === false ? hide(hours) : show(hours);
-        checkboxms.checked === false ? hide(ms) : show(ms);
-    }
-
-    function updatePadding() {
-        let padding = document.getElementById("padding").value;
-        document.getElementById("msg").style.paddingTop = padding + "em";
-    }
-
-    updatePadding();
-    showHide();
-</script>
 </body>
 </html>
