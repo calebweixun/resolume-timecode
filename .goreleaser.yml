@@ -80,7 +80,7 @@ changelog:
 
 release:
   github:
-    owner: chabad360
+    owner: calebweixun
     name: resolume-timecode
   draft: true
   prerelease: auto
