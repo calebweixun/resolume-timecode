@@ -25,11 +25,6 @@ builds:
       - -X main.version={{.Version}}
       - -X main.Date={{.CommitDate}}
     mod_timestamp: '{{ .CommitTimestamp }}'
-    hooks:
-      post:
-        - upx {{ .Path }}
-        - sh macos.sh resolume-timecode images/logo.svg "me.chabad360.resolume-timecode" {{ .Major }} {{ .Minor }}
-        - cp {{ .Path }} resolume-timecode.app/Contents/MacOS/
 
   - id: darwin-arm64
     goos: [darwin]
@@ -44,10 +39,6 @@ builds:
       - -X main.version={{.Version}}
       - -X main.Date={{.CommitDate}}
     mod_timestamp: '{{ .CommitTimestamp }}'
-    hooks:
-      post:
-        - sh macos.sh resolume-timecode images/logo.svg "me.chabad360.resolume-timecode" {{ .Major }} {{ .Minor }}
-        - cp {{ .Path }} resolume-timecode.app/Contents/MacOS/
 
   - id: windows
     goos: [windows]
@@ -67,6 +58,17 @@ builds:
     mod_timestamp: '{{ .CommitTimestamp }}'
     hooks:
       post: upx {{ .Path }}
+
+universal_binaries:
+  - id: darwin-universal
+    ids: [darwin-amd64, darwin-arm64]
+    name_template: resolume-timecode
+    replace: true
+    mod_timestamp: '{{ .CommitTimestamp }}'
+    hooks:
+      post:
+        - sh macos.sh resolume-timecode images/logo.svg "me.chabad360.resolume-timecode" {{ .Major }} {{ .Minor }}
+        - cp {{ .Path }} resolume-timecode.app/Contents/MacOS/
 
 checksum:
   name_template: 'checksums.txt'
@@ -89,14 +91,10 @@ release:
 
 archives:
   - id: darwin
-    ids: [darwin-amd64, darwin-arm64]
+    ids: [darwin-universal]
     formats: [zip]
     wrap_in_directory: true
-    name_template: >-
-      {{ .ProjectName }}_
-      {{- .Version }}_
-      {{- if eq .Os "darwin" }}macOS{{ else }}{{ .Os }}{{ end }}_
-      {{- .Arch }}
+    name_template: '{{ .ProjectName }}_{{ .Version }}_macOS_Universal'
     files:
       - LICENSE
       - README.MD
