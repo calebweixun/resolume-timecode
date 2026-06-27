@@ -1,2 +1,4 @@
 dist/
 .idea/
+.claude/
+/resolume-timecode-dev

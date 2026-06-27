@@ -1,8 +1,10 @@
+version: 2
+
 project_name: resolume-timecode
 
 before:
   hooks:
-    - go get github.com/tc-hib/go-winres@latest
+    - go install github.com/tc-hib/go-winres@latest
     - go mod download
     - bash -c "rsvg-convert -h 256 images/logo.svg > winres/icon.png"
     - bash -c "rsvg-convert -h 32 images/logo.svg > images/favicon.png"
@@ -87,8 +89,8 @@ release:
 
 archives:
   - id: darwin
-    builds: [darwin-amd64, darwin-arm64]
-    format: zip
+    ids: [darwin-amd64, darwin-arm64]
+    formats: [zip]
     wrap_in_directory: true
     name_template: >-
       {{ .ProjectName }}_
@@ -101,7 +103,7 @@ archives:
       - resolume-timecode.app
 
   - id: windows
-    builds: [windows]
-    format: zip
+    ids: [windows]
+    formats: [zip]
     wrap_in_directory: true
     name_template: '{{ .ProjectName }}_{{ .Version }}_Windows_{{ .Arch }}'

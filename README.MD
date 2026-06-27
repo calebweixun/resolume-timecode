@@ -10,7 +10,7 @@
 
 ## How to use
 
-1. Download the [latest release](https://github.com/chabad360/resolume-timecode/releases)
+1. Download the [latest release](https://github.com/calebweixun/resolume-timecode/releases)
 2. Open the app and verify that all the information in there is set correctly.
 3. Click _Start Server_
 4. Open your web browser to the location specified by the application.
