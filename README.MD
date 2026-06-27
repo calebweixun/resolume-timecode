@@ -17,6 +17,17 @@
 5. Start playing a clip in Resolume.
 6. Profit.
 
+### macOS: opening the downloaded app
+
+The macOS build is not notarized. If macOS blocks it after you extract the ZIP,
+remove the quarantine attribute from this app only, then open it again:
+
+```bash
+xattr -dr com.apple.quarantine "/Applications/resolume-timecode.app"
+```
+
+Adjust the path if you placed the app somewhere other than `/Applications`.
+
 > Note: The precision should be within a few hundred milliseconds (usually 50ms), if it feels off double check that the clip length 
 (in the status bar on the bottom) is correct. If it isn't, just click the reset button.
 
