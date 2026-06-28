@@ -168,14 +168,15 @@ func procConnected(data *osc.Message) {
 		}
 		return
 	}
-	if activeClipPath == path {
+	// A transition can report multiple connected clips in one wildcard query.
+	// Keep the current target until Resolume explicitly disconnects it instead
+	// of oscillating between candidates on every discovery pass.
+	if activeClipPath != "" {
 		return
 	}
 	activeClipPath = path
 	posPrev = 0
 	requestClipMetadata()
-	broadcast.Publish(osc.NewMessage("/reset"))
-	broadcast.Send()
 }
 
 func firstNumber(data *osc.Message) (float32, bool) {

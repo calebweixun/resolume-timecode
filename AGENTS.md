@@ -83,7 +83,8 @@ tag after publishing; create the next patch version instead.
   Resolume must still accept OSC queries on its configured input port.
 - A configured layer path such as `/composition/layers/1` follows that layer's
   playing clip. The app uses the `clips/playing` alias as a fallback and polls
-  `clips/*/connected` to discover the exact active clip path.
+  `clips/*/connected` to discover the exact active clip path. Discovery keeps
+  the current clip stable during transitions and does not reset web clients.
 
 ## Change Discipline
 

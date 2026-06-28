@@ -53,3 +53,28 @@ func TestMonitoredClipPathUsesPlayingClipForLayer(t *testing.T) {
 		t.Fatalf("expected discovered clip path %q, got %q", activeClipPath, got)
 	}
 }
+
+func TestConnectedDiscoveryKeepsCurrentClipStable(t *testing.T) {
+	originalActive := activeClipPath
+	originalPrev := posPrev
+	t.Cleanup(func() {
+		activeClipPath = originalActive
+		posPrev = originalPrev
+	})
+
+	activeClipPath = "/composition/layers/1/clips/2"
+	posPrev = 0.5
+	procConnected(osc.NewMessage("/composition/layers/1/clips/3/connected", int32(1)))
+
+	if activeClipPath != "/composition/layers/1/clips/2" {
+		t.Fatalf("discovery switched active clip unexpectedly: %q", activeClipPath)
+	}
+	if posPrev != 0.5 {
+		t.Fatalf("discovery reset position unexpectedly: %v", posPrev)
+	}
+
+	procConnected(osc.NewMessage("/composition/layers/1/clips/2/connected", int32(0)))
+	if activeClipPath != "" {
+		t.Fatalf("disconnected clip was not cleared: %q", activeClipPath)
+	}
+}
