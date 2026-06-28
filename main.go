@@ -46,8 +46,6 @@ var (
 	oscServer  *osc.Server
 	wg         sync.WaitGroup
 	running    bool
-	message    = &osc.Message{Arguments: []interface{}{"?"}}
-	message2   = &osc.Message{Arguments: []interface{}{"?"}}
 	t          = time.Tick(time.Minute)
 )
 
@@ -106,11 +104,17 @@ func serverStart() error {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
+		metadataPolls := 0
 		for !running {
 		}
 		for running {
 			time.Sleep(time.Millisecond * 110)
 			requestPosition()
+			metadataPolls++
+			if metadataPolls >= 9 {
+				requestClipMetadata()
+				metadataPolls = 0
+			}
 			clipLengthBinding.Set(fmt.Sprintf("Clip Length: %.3fs", clipLength))
 			timeLeftBinding.Set(timeLeft)
 			// Mirror GUI updates to web — ensures web gets a heartbeat even

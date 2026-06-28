@@ -68,9 +68,10 @@ the remaining time was to ask the guy in front of the laptop. So I decided to fi
 
 ## How it works
 
-Resolume outputs the position of the clip head through OSC. The server receives these messages, calculates the remaining
-time, and broadcasts it to all connected web clients via WebSocket every ~110ms. The browser then interpolates between
-updates using `requestAnimationFrame` for a smooth, continuously-running display.
+The server polls Resolume's clip position through OSC about every 110ms and refreshes the selected clip's name and duration
+about once per second. It calculates the remaining time and broadcasts it to all connected web clients via WebSocket. The
+browser then interpolates between updates using `requestAnimationFrame` for a smooth, continuously-running display. Manual
+Reset is only needed for troubleshooting.
 
 For the exact algorithm, check [procmessage.go](https://github.com/chabad360/resolume-timecode/blob/master/procmessage.go).
 

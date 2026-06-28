@@ -78,7 +78,8 @@ tag after publishing; create the next patch version instead.
 - The two macOS builds are merged before `.app` packaging to prevent parallel
   hooks from overwriting one another.
 - While the server is running, the app actively polls Resolume transport
-  position about every 110 ms. Continuous OSC Output is therefore optional;
+  position about every 110 ms and refreshes clip name/duration about once per
+  second. Continuous OSC Output and manual Reset are therefore optional;
   Resolume must still accept OSC queries on its configured input port.
 
 ## Change Discipline

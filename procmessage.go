@@ -57,17 +57,19 @@ func procDuration(data *osc.Message) {
 }
 
 func reset() {
-	lightReset()
+	requestClipMetadata()
 
 	posPrev = 0
 	broadcast.Publish(osc.NewMessage("/reset"))
 	broadcast.Send()
 }
 
-func lightReset() {
-	message.Address = clipPath + "/name"
-	message2.Address = clipPath + "/transport/position/behaviour/duration"
-	if _, err := oscServer.WriteTo(osc.NewBundle(message, message2), OSCAddr+":"+OSCPort); err != nil {
+// requestClipMetadata keeps the selected clip name and duration synchronized
+// even when Resolume does not proactively publish OSC state changes.
+func requestClipMetadata() {
+	name := osc.NewMessage(clipPath+"/name", "?")
+	duration := osc.NewMessage(clipPath+"/transport/position/behaviour/duration", "?")
+	if _, err := oscServer.WriteTo(osc.NewBundle(name, duration), OSCAddr+":"+OSCPort); err != nil {
 		fmt.Println(err)
 	}
 }
