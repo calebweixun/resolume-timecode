@@ -69,9 +69,9 @@ tag after publishing; create the next patch version instead.
 ## Current State (2026-06-27)
 
 - Branch: `master`; remote: `calebweixun/resolume-timecode`.
-- Latest release tag: `v1.0.4` at commit `42257d8`.
-- Release Action run `28308294070` completed successfully.
-- The `v1.0.4` GitHub Release exists as a draft with macOS Universal, Windows
+- Latest release tag: `v1.0.5` at commit `2f6aa1f`.
+- Release Action run `28312373994` completed successfully.
+- The `v1.0.5` GitHub Release exists as a draft with macOS Universal, Windows
   amd64, and checksum assets; it still needs manual publication.
 - macOS UPX compression was removed because UPX 5.2 rejects macOS binaries.
   Windows UPX compression remains enabled.
