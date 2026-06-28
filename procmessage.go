@@ -161,7 +161,10 @@ func procConnected(data *osc.Message) {
 		return
 	}
 	path := strings.TrimSuffix(data.Address, "/connected")
-	if value == 0 {
+	// Resolume's connected value is a state code, not a boolean:
+	// 0/1 = idle, 2 = selected, 3 = playing, 4 = playing and selected.
+	// Only 3 and 4 represent the clip currently playing in the layer.
+	if value < 3 {
 		if activeClipPath == path {
 			activeClipPath = ""
 			posPrev = 0

@@ -64,7 +64,7 @@ func TestConnectedDiscoveryKeepsCurrentClipStable(t *testing.T) {
 
 	activeClipPath = "/composition/layers/1/clips/2"
 	posPrev = 0.5
-	procConnected(osc.NewMessage("/composition/layers/1/clips/3/connected", int32(1)))
+	procConnected(osc.NewMessage("/composition/layers/1/clips/3/connected", int32(3)))
 
 	if activeClipPath != "/composition/layers/1/clips/2" {
 		t.Fatalf("discovery switched active clip unexpectedly: %q", activeClipPath)
@@ -73,8 +73,20 @@ func TestConnectedDiscoveryKeepsCurrentClipStable(t *testing.T) {
 		t.Fatalf("discovery reset position unexpectedly: %v", posPrev)
 	}
 
-	procConnected(osc.NewMessage("/composition/layers/1/clips/2/connected", int32(0)))
+	// Selected (2) is not playing and must release the previous clip.
+	procConnected(osc.NewMessage("/composition/layers/1/clips/2/connected", int32(2)))
 	if activeClipPath != "" {
-		t.Fatalf("disconnected clip was not cleared: %q", activeClipPath)
+		t.Fatalf("non-playing clip was not cleared: %q", activeClipPath)
+	}
+}
+
+func TestConnectedDiscoveryIgnoresSelectedButNotPlayingClip(t *testing.T) {
+	originalActive := activeClipPath
+	t.Cleanup(func() { activeClipPath = originalActive })
+
+	activeClipPath = ""
+	procConnected(osc.NewMessage("/composition/layers/1/clips/1/connected", int32(2)))
+	if activeClipPath != "" {
+		t.Fatalf("selected clip incorrectly treated as playing: %q", activeClipPath)
 	}
 }

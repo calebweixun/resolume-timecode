@@ -85,6 +85,8 @@ tag after publishing; create the next patch version instead.
   playing clip. The app uses the `clips/playing` alias as a fallback and polls
   `clips/*/connected` to discover the exact active clip path. Discovery keeps
   the current clip stable during transitions and does not reset web clients.
+  Resolume connected state codes `3` and `4` mean playing; `0` through `2` do
+  not and must not lock the monitored clip.
 
 ## Change Discipline
 
