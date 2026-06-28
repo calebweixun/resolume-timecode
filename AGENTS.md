@@ -81,6 +81,9 @@ tag after publishing; create the next patch version instead.
   position about every 110 ms and refreshes clip name/duration about once per
   second. Continuous OSC Output and manual Reset are therefore optional;
   Resolume must still accept OSC queries on its configured input port.
+- A configured layer path such as `/composition/layers/1` follows that layer's
+  playing clip. The app uses the `clips/playing` alias as a fallback and polls
+  `clips/*/connected` to discover the exact active clip path.
 
 ## Change Discipline
 

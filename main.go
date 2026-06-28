@@ -113,6 +113,7 @@ func serverStart() error {
 			metadataPolls++
 			if metadataPolls >= 9 {
 				requestClipMetadata()
+				requestLayerClipDiscovery()
 				metadataPolls = 0
 			}
 			clipLengthBinding.Set(fmt.Sprintf("Clip Length: %.3fs", clipLength))

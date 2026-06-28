@@ -40,7 +40,9 @@ Adjust the path if you placed the app somewhere other than `/Applications`.
 | Selected Layer | `/composition/selectedlayer`    |
 | Specific Layer | `/composition/layers/1`         |
 
-> Note: using a layer will cause the layer's name to be shown on the client instead of the clip name.
+> Note: using a layer follows the clip currently playing in that layer. The app
+> periodically discovers the connected clip and updates its name, duration, and
+> countdown automatically.
 
 ## Clock Settings
 
